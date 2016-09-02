@@ -18,6 +18,7 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polygon;
 import com.google.android.gms.maps.model.PolygonOptions;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -27,6 +28,7 @@ public class PolygonDemoActivity extends AppCompatActivity
     private static final LatLng SYDNEY = new LatLng(-33.87365, 151.20689);
     GoogleMap mMap;
     List<LatLng> shapePoints;
+    int currentDragMarker;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,12 +54,14 @@ public class PolygonDemoActivity extends AppCompatActivity
         LatLng topLeft = new LatLng(start.latitude + height, start.longitude);
         LatLng topRight = new LatLng(start.latitude + height, start.longitude + width);
         LatLng btmRight = new LatLng(start.latitude, start.longitude + width);
-        shapePoints = Arrays.asList(btmLeft, topLeft, topRight, btmRight);
+        shapePoints = new ArrayList(Arrays.asList(btmLeft, topLeft, topRight, btmRight));
 
-        mMap.addPolygon(new PolygonOptions()
+        final PolygonOptions poly = new PolygonOptions()
                 .addAll(createShapeFromArray(shapePoints))
                 .fillColor(Color.argb(90,112,123,43))
-                .strokeColor(Color.BLACK));
+                .strokeColor(Color.BLACK);
+
+        final Polygon polygon = mMap.addPolygon(poly);
 
         // Move the map so that it is centered on the mutable polygon.
         mMap.moveCamera(CameraUpdateFactory.newLatLng(SYDNEY));
@@ -65,17 +69,18 @@ public class PolygonDemoActivity extends AppCompatActivity
         mMap.setOnMarkerDragListener(new GoogleMap.OnMarkerDragListener() {
             @Override
             public void onMarkerDragStart(Marker marker) {
-
+                int tag = Integer.parseInt(marker.getTitle());
+                currentDragMarker = tag;
             }
 
             @Override
             public void onMarkerDrag(Marker marker) {
-
+                shapePoints.set(currentDragMarker, marker.getPosition());
+                polygon.setPoints(shapePoints);
             }
 
             @Override
             public void onMarkerDragEnd(Marker marker) {
-
             }
         });
 
@@ -86,41 +91,9 @@ public class PolygonDemoActivity extends AppCompatActivity
         for (int j = 0; j < points.size(); j++) {
             mMap.addMarker(new MarkerOptions()
                     .position(points.get(j))
+                    .title(""+j)
                     .draggable(true));
         }
         return points;
-    }
-
-    private List<LatLng> createRectangle(LatLng start, double width, double height) {
-        LatLng btmLeft = new LatLng(start.latitude, start.longitude);
-        LatLng topLeft = new LatLng(start.latitude + height, start.longitude);
-        LatLng topRight = new LatLng(start.latitude + height, start.longitude + width);
-        LatLng btmRight = new LatLng(start.latitude, start.longitude + width);
-
-        mMap.addMarker(new MarkerOptions()
-                .position(topRight)
-                .draggable(true));
-        mMap.setOnMarkerDragListener(new GoogleMap.OnMarkerDragListener() {
-            @Override
-            public void onMarkerDragStart(Marker marker) {
-
-            }
-
-            @Override
-            public void onMarkerDrag(Marker marker) {
-
-            }
-
-            @Override
-            public void onMarkerDragEnd(Marker marker) {
-                marker.getPosition();
-            }
-        });
-
-        return Arrays.asList(
-                btmLeft,
-                topLeft,
-                topRight,
-                btmRight);
     }
 }
