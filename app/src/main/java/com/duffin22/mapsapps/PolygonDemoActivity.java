@@ -25,26 +25,6 @@ public class PolygonDemoActivity extends AppCompatActivity
 
     private static final LatLng SYDNEY = new LatLng(-33.87365, 151.20689);
 
-    private static final int WIDTH_MAX = 50;
-
-    private static final int HUE_MAX = 360;
-
-    private static final int ALPHA_MAX = 255;
-
-    private Polygon mMutablePolygon;
-
-    private Polygon mClickablePolygonWithHoles;
-
-    private SeekBar mColorBar;
-
-    private SeekBar mAlphaBar;
-
-    private SeekBar mWidthBar;
-
-    private CheckBox mClickabilityCheckbox;
-
-    private GoogleMap mMap;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -62,7 +42,7 @@ public class PolygonDemoActivity extends AppCompatActivity
         map.setContentDescription("Google Map with polygons.");
 
         map.addPolygon(new PolygonOptions()
-                .addAll(createRectangle(new LatLng(-27, 140), 10, 7))
+                .addAll(createRectangle(map,SYDNEY, 4, 4))
                 .fillColor(Color.argb(90,112,123,43))
                 .strokeColor(Color.BLACK));
 
@@ -80,11 +60,19 @@ public class PolygonDemoActivity extends AppCompatActivity
         });
     }
 
-    private List<LatLng> createRectangle(LatLng center, double halfWidth, double halfHeight) {
-        return Arrays.asList(new LatLng(center.latitude - halfHeight, center.longitude - halfWidth),
-                new LatLng(center.latitude - halfHeight, center.longitude + halfWidth),
-                new LatLng(center.latitude + halfHeight, center.longitude + halfWidth),
-                new LatLng(center.latitude + halfHeight, center.longitude - halfWidth),
-                new LatLng(center.latitude - halfHeight, center.longitude - halfWidth));
+    private List<LatLng> createRectangle(GoogleMap mMap, LatLng start, double width, double height) {
+        LatLng btmLeft = new LatLng(start.latitude, start.longitude);
+        LatLng topLeft = new LatLng(start.latitude + height, start.longitude);
+        LatLng topRight = new LatLng(start.latitude + height, start.longitude + width);
+        LatLng btmRight = new LatLng(start.latitude, start.longitude + width);
+
+        mMap.addMarker(new MarkerOptions()
+                .position(topRight));
+
+        return Arrays.asList(
+                btmLeft,
+                topLeft,
+                topRight,
+                btmRight);
     }
 }
