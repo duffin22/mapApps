@@ -13,6 +13,7 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polygon;
 import com.google.android.gms.maps.model.PolygonOptions;
@@ -24,6 +25,8 @@ public class PolygonDemoActivity extends AppCompatActivity
             implements OnMapReadyCallback {
 
     private static final LatLng SYDNEY = new LatLng(-33.87365, 151.20689);
+    GoogleMap mMap;
+    List<LatLng> shapePoints;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,35 +42,80 @@ public class PolygonDemoActivity extends AppCompatActivity
     public void onMapReady(GoogleMap map) {
         // Override the default content description on the view, for accessibility mode.
         // Ideally this string would be localised.
+        mMap = map;
         map.setContentDescription("Google Map with polygons.");
 
-        map.addPolygon(new PolygonOptions()
-                .addAll(createRectangle(map,SYDNEY, 4, 4))
+        LatLng start = SYDNEY;
+        int height = 4;
+        int width = 4;
+        LatLng btmLeft = new LatLng(start.latitude, start.longitude);
+        LatLng topLeft = new LatLng(start.latitude + height, start.longitude);
+        LatLng topRight = new LatLng(start.latitude + height, start.longitude + width);
+        LatLng btmRight = new LatLng(start.latitude, start.longitude + width);
+        shapePoints = Arrays.asList(btmLeft, topLeft, topRight, btmRight);
+
+        mMap.addPolygon(new PolygonOptions()
+                .addAll(createShapeFromArray(shapePoints))
                 .fillColor(Color.argb(90,112,123,43))
                 .strokeColor(Color.BLACK));
 
         // Move the map so that it is centered on the mutable polygon.
-        map.moveCamera(CameraUpdateFactory.newLatLng(SYDNEY));
+        mMap.moveCamera(CameraUpdateFactory.newLatLng(SYDNEY));
 
-        // Add a listener for polygon clicks that changes the clicked polygon's stroke color.
-        map.setOnPolygonClickListener(new GoogleMap.OnPolygonClickListener() {
+        mMap.setOnMarkerDragListener(new GoogleMap.OnMarkerDragListener() {
             @Override
-            public void onPolygonClick(Polygon polygon) {
-                // Flip the r, g and b components of the polygon's stroke color.
-                int strokeColor = polygon.getStrokeColor() ^ 0x00ffffff;
-                polygon.setStrokeColor(strokeColor);
+            public void onMarkerDragStart(Marker marker) {
+
+            }
+
+            @Override
+            public void onMarkerDrag(Marker marker) {
+
+            }
+
+            @Override
+            public void onMarkerDragEnd(Marker marker) {
+
             }
         });
+
     }
 
-    private List<LatLng> createRectangle(GoogleMap mMap, LatLng start, double width, double height) {
+    private List<LatLng> createShapeFromArray(List<LatLng> points) {
+
+        for (int j = 0; j < points.size(); j++) {
+            mMap.addMarker(new MarkerOptions()
+                    .position(points.get(j))
+                    .draggable(true));
+        }
+        return points;
+    }
+
+    private List<LatLng> createRectangle(LatLng start, double width, double height) {
         LatLng btmLeft = new LatLng(start.latitude, start.longitude);
         LatLng topLeft = new LatLng(start.latitude + height, start.longitude);
         LatLng topRight = new LatLng(start.latitude + height, start.longitude + width);
         LatLng btmRight = new LatLng(start.latitude, start.longitude + width);
 
         mMap.addMarker(new MarkerOptions()
-                .position(topRight));
+                .position(topRight)
+                .draggable(true));
+        mMap.setOnMarkerDragListener(new GoogleMap.OnMarkerDragListener() {
+            @Override
+            public void onMarkerDragStart(Marker marker) {
+
+            }
+
+            @Override
+            public void onMarkerDrag(Marker marker) {
+
+            }
+
+            @Override
+            public void onMarkerDragEnd(Marker marker) {
+                marker.getPosition();
+            }
+        });
 
         return Arrays.asList(
                 btmLeft,
