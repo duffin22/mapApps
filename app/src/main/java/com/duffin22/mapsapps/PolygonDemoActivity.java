@@ -148,11 +148,11 @@ public class PolygonDemoActivity extends AppCompatActivity
         final PolygonOptions polyS = new PolygonOptions()
                 .addAll(createShapeFromArray(shapePoints))
                 .fillColor(Color.argb(90, 200, 200, 50))
-                .strokeColor(Color.BLACK);
+                .strokeColor(Color.WHITE);
 
         final Polygon polygon = mMap.addPolygon(polyS);
 
-        PolylineOptions polyL = getCurrentPolyLine();
+        PolylineOptions polyL = getCurrentPolyLine(8);
 
         Polyline polyline = mMap.addPolyline(polyL);
 
@@ -182,42 +182,37 @@ public class PolygonDemoActivity extends AppCompatActivity
 
     }
 
-    public PolylineOptions getCurrentPolyLine() {
-
+    public PolylineOptions getCurrentPolyLine(int split) {
+        boolean toggle = true;
         PolylineOptions pl = new PolylineOptions()
-                .color(Color.argb(255, 50, 50, 200))
-                .add(shapePoints.get(0))
-                .add(shapePoints.get(1))
-                .add(getMidpoint(shapePoints.get(1),shapePoints.get(2)))
-                .add(getMidpoint(shapePoints.get(0),shapePoints.get(3)))
-                .add(shapePoints.get(3))
-                .add(shapePoints.get(2));
+                .color(Color.argb(255, 50, 50, 200));
 
+        for (int i=0; i<=split; i++) {
+            if (toggle) {
+                pl.add(getFractionAlongLine(i, split, shapePoints.get(0), shapePoints.get(3)));
+                pl.add(getFractionAlongLine(i, split, shapePoints.get(1), shapePoints.get(2)));
+            } else {
+                pl.add(getFractionAlongLine(i, split, shapePoints.get(1), shapePoints.get(2)));
+                pl.add(getFractionAlongLine(i, split, shapePoints.get(0), shapePoints.get(3)));
+            }
+            toggle=!toggle;
+        }
 
 
         return pl;
     }
 
-    public LatLng getMidpoint(LatLng point1, LatLng point2) {
-
+    public LatLng getFractionAlongLine(int numerator, int denominator, LatLng point1, LatLng point2) {
         double lat1 = point1.latitude, lat2 = point2.latitude;
         double lon1 = point1.longitude, lon2 = point2.longitude;
 
-        double dLon = Math.toRadians(lon2 - lon1);
+        double fraction = (double) numerator/denominator;
 
-        //convert to radians
-        lat1 = Math.toRadians(lat1);
-        lat2 = Math.toRadians(lat2);
-        lon1 = Math.toRadians(lon1);
-
-        double Bx = Math.cos(lat2) * Math.cos(dLon);
-        double By = Math.cos(lat2) * Math.sin(dLon);
-        double lat3 = Math.atan2(Math.sin(lat1) + Math.sin(lat2), Math.sqrt((Math.cos(lat1) + Bx) * (Math.cos(lat1) + Bx) + By * By));
-        double lon3 = lon1 + Math.atan2(By, Math.cos(lat1) + Bx);
+        double newLat = (lat2 * fraction) + (lat1 * (1-fraction));
+        double newLong = (lon2 * fraction) + (lon1 * (1-fraction));
 
 
-        return new LatLng(Math.toDegrees(lat3),Math.toDegrees(lon3));
-
+        return new LatLng(newLat,newLong);
     }
 
     @Override
