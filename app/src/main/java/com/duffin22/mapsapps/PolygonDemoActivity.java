@@ -24,6 +24,7 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -78,10 +79,19 @@ public class PolygonDemoActivity extends AppCompatActivity
     private List<LatLng> createShapeFromArray(List<LatLng> points) {
 
         for (int j = 0; j < points.size(); j++) {
-            mMap.addMarker(new MarkerOptions()
-                    .position(points.get(j))
-                    .title("" + j)
-                    .draggable(true));
+            if (j == 0) {
+                mMap.addMarker(new MarkerOptions()
+                        .position(points.get(j))
+                        .title("" + j)
+                        .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE))
+                        .draggable(true));
+            } else {
+                mMap.addMarker(new MarkerOptions()
+                        .position(points.get(j))
+                        .title("" + j)
+                        .draggable(true));
+            }
+
         }
         return points;
     }
