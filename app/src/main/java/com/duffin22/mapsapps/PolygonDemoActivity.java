@@ -30,6 +30,8 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polygon;
 import com.google.android.gms.maps.model.PolygonOptions;
+import com.google.android.gms.maps.model.Polyline;
+import com.google.android.gms.maps.model.PolylineOptions;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -106,7 +108,6 @@ public class PolygonDemoActivity extends AppCompatActivity
         super.onStop();
     }
 
-
     @Override
     public void onConnected(Bundle connectionHint) {
         int permissionCheck = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION);
@@ -144,12 +145,16 @@ public class PolygonDemoActivity extends AppCompatActivity
         LatLng btmRight = new LatLng(start.latitude, start.longitude + width);
         shapePoints = new ArrayList(Arrays.asList(btmLeft, topLeft, topRight, btmRight));
 
-        final PolygonOptions poly = new PolygonOptions()
+        final PolygonOptions polyS = new PolygonOptions()
                 .addAll(createShapeFromArray(shapePoints))
-                .fillColor(Color.argb(90, 112, 123, 43))
+                .fillColor(Color.argb(90, 200, 200, 50))
                 .strokeColor(Color.BLACK);
 
-        final Polygon polygon = mMap.addPolygon(poly);
+        final Polygon polygon = mMap.addPolygon(polyS);
+
+        PolylineOptions polyL = getCurrentPolyLine();
+
+        Polyline polyline = mMap.addPolyline(polyL);
 
         CameraUpdate zoom=CameraUpdateFactory.zoomTo(15);
 
@@ -174,6 +179,44 @@ public class PolygonDemoActivity extends AppCompatActivity
             }
         });
 
+
+    }
+
+    public PolylineOptions getCurrentPolyLine() {
+
+        PolylineOptions pl = new PolylineOptions()
+                .color(Color.argb(255, 50, 50, 200))
+                .add(shapePoints.get(0))
+                .add(shapePoints.get(1))
+                .add(getMidpoint(shapePoints.get(1),shapePoints.get(2)))
+                .add(getMidpoint(shapePoints.get(0),shapePoints.get(3)))
+                .add(shapePoints.get(3))
+                .add(shapePoints.get(2));
+
+
+
+        return pl;
+    }
+
+    public LatLng getMidpoint(LatLng point1, LatLng point2) {
+
+        double lat1 = point1.latitude, lat2 = point2.latitude;
+        double lon1 = point1.longitude, lon2 = point2.longitude;
+
+        double dLon = Math.toRadians(lon2 - lon1);
+
+        //convert to radians
+        lat1 = Math.toRadians(lat1);
+        lat2 = Math.toRadians(lat2);
+        lon1 = Math.toRadians(lon1);
+
+        double Bx = Math.cos(lat2) * Math.cos(dLon);
+        double By = Math.cos(lat2) * Math.sin(dLon);
+        double lat3 = Math.atan2(Math.sin(lat1) + Math.sin(lat2), Math.sqrt((Math.cos(lat1) + Bx) * (Math.cos(lat1) + Bx) + By * By));
+        double lon3 = lon1 + Math.atan2(By, Math.cos(lat1) + Bx);
+
+
+        return new LatLng(Math.toDegrees(lat3),Math.toDegrees(lon3));
 
     }
 
