@@ -1,25 +1,25 @@
 package com.duffin22.mapsapps;
 
-import android.*;
 import android.Manifest;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.location.Location;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.view.View;
-import android.widget.CheckBox;
-import android.widget.SeekBar;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.PendingResult;
+import com.google.android.gms.location.LocationListener;
+import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.LocationSettingsRequest;
+import com.google.android.gms.location.LocationSettingsResult;
+import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -35,11 +35,12 @@ import java.util.Arrays;
 import java.util.List;
 
 public class PolygonDemoActivity extends AppCompatActivity
-            implements OnMapReadyCallback,
-            GoogleApiClient.ConnectionCallbacks,
-            GoogleApiClient.OnConnectionFailedListener {
+        implements OnMapReadyCallback,
+        GoogleApiClient.ConnectionCallbacks,
+        GoogleApiClient.OnConnectionFailedListener
+//        LocationListener
+        {
 
-    private static final LatLng SYDNEY = new LatLng(-33.87365, 151.20689);
     public static final int ACCESS_FINE_LOCATION = 1992;
     GoogleMap mMap;
     List<LatLng> shapePoints;
@@ -71,44 +72,6 @@ public class PolygonDemoActivity extends AppCompatActivity
         // Override the default content description on the view, for accessibility mode.
         // Ideally this string would be localised.
         mMap = map;
-        map.setContentDescription("Google Map with polygons.");
-
-        LatLng start = SYDNEY;
-        int height = 4;
-        int width = 4;
-        LatLng btmLeft = new LatLng(start.latitude, start.longitude);
-        LatLng topLeft = new LatLng(start.latitude + height, start.longitude);
-        LatLng topRight = new LatLng(start.latitude + height, start.longitude + width);
-        LatLng btmRight = new LatLng(start.latitude, start.longitude + width);
-        shapePoints = new ArrayList(Arrays.asList(btmLeft, topLeft, topRight, btmRight));
-
-        final PolygonOptions poly = new PolygonOptions()
-                .addAll(createShapeFromArray(shapePoints))
-                .fillColor(Color.argb(90,112,123,43))
-                .strokeColor(Color.BLACK);
-
-        final Polygon polygon = mMap.addPolygon(poly);
-
-        // Move the map so that it is centered on the mutable polygon.
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(SYDNEY));
-
-        mMap.setOnMarkerDragListener(new GoogleMap.OnMarkerDragListener() {
-            @Override
-            public void onMarkerDragStart(Marker marker) {
-                int tag = Integer.parseInt(marker.getTitle());
-                currentDragMarker = tag;
-            }
-
-            @Override
-            public void onMarkerDrag(Marker marker) {
-                shapePoints.set(currentDragMarker, marker.getPosition());
-                polygon.setPoints(shapePoints);
-            }
-
-            @Override
-            public void onMarkerDragEnd(Marker marker) {
-            }
-        });
 
     }
 
@@ -117,7 +80,7 @@ public class PolygonDemoActivity extends AppCompatActivity
         for (int j = 0; j < points.size(); j++) {
             mMap.addMarker(new MarkerOptions()
                     .position(points.get(j))
-                    .title(""+j)
+                    .title("" + j)
                     .draggable(true));
         }
         return points;
@@ -141,10 +104,7 @@ public class PolygonDemoActivity extends AppCompatActivity
             ActivityCompat.requestPermissions(
                     this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, ACCESS_FINE_LOCATION);
         } else {
-            mLastLocation = LocationServices.FusedLocationApi.getLastLocation(
-                    mGoogleApiClient);
-            mMap.addMarker(new MarkerOptions()
-                    .position(new LatLng(mLastLocation.getLatitude(),mLastLocation.getLongitude())));
+            onPermissionLocationSuccess();
         }
 
     }
@@ -157,9 +117,54 @@ public class PolygonDemoActivity extends AppCompatActivity
         } else {
             mLastLocation = LocationServices.FusedLocationApi.getLastLocation(
                     mGoogleApiClient);
-            mMap.addMarker(new MarkerOptions()
-                    .position(new LatLng(mLastLocation.getLatitude(),mLastLocation.getLongitude())));
+
+            setUpMapForNewProject();
+
         }
+    }
+
+    public void setUpMapForNewProject() {
+
+        LatLng start = new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude());
+        double height = 0.003;
+        double width = 0.005;
+        LatLng btmLeft = new LatLng(start.latitude, start.longitude);
+        LatLng topLeft = new LatLng(start.latitude + height, start.longitude);
+        LatLng topRight = new LatLng(start.latitude + height, start.longitude + width);
+        LatLng btmRight = new LatLng(start.latitude, start.longitude + width);
+        shapePoints = new ArrayList(Arrays.asList(btmLeft, topLeft, topRight, btmRight));
+
+        final PolygonOptions poly = new PolygonOptions()
+                .addAll(createShapeFromArray(shapePoints))
+                .fillColor(Color.argb(90, 112, 123, 43))
+                .strokeColor(Color.BLACK);
+
+        final Polygon polygon = mMap.addPolygon(poly);
+
+        CameraUpdate zoom=CameraUpdateFactory.zoomTo(15);
+
+        mMap.moveCamera(CameraUpdateFactory.newLatLng(start));
+        mMap.animateCamera(zoom);
+
+        mMap.setOnMarkerDragListener(new GoogleMap.OnMarkerDragListener() {
+            @Override
+            public void onMarkerDragStart(Marker marker) {
+                int tag = Integer.parseInt(marker.getTitle());
+                currentDragMarker = tag;
+            }
+
+            @Override
+            public void onMarkerDrag(Marker marker) {
+                shapePoints.set(currentDragMarker, marker.getPosition());
+                polygon.setPoints(shapePoints);
+            }
+
+            @Override
+            public void onMarkerDragEnd(Marker marker) {
+            }
+        });
+
+
     }
 
     @Override
