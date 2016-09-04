@@ -43,16 +43,50 @@ public class MapLine {
         }
     }
 
+
     public boolean containsLat(double latitude) {
-        return true;
+        double lowestLat, highestLat;
+        if (this.startPoint.latitude < this.endPoint.latitude) {
+            lowestLat = this.startPoint.latitude;
+            highestLat = this.endPoint.latitude;
+        } else {
+            highestLat = this.startPoint.latitude;
+            lowestLat = this.endPoint.latitude;
+        }
+        if (lowestLat <= latitude && latitude <= highestLat) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
     public boolean containsLong(double longitude) {
-        return true;
+        double lowestLong, highestLong;
+        if (this.startPoint.longitude < this.endPoint.longitude) {
+            lowestLong = this.startPoint.longitude;
+            highestLong = this.endPoint.longitude;
+        } else {
+            lowestLong = this.startPoint.longitude;
+            highestLong = this.endPoint.longitude;
+        }
+        if (lowestLong <= longitude && longitude <= highestLong) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
-    public boolean intersectsWith(MapLine line) {
-        return true;
+    public LatLng intersectWith(MapLine line) {
+        if (line.gradient - this.gradient < 0.0001) {
+            return null;
+        }
+        double latIntersect = (line.constant - this.constant)/(this.gradient - line.gradient);
+
+        if (line.containsLat(latIntersect) && this.containsLat(latIntersect)) {
+            return new LatLng(latIntersect,this.getLongFromLat(latIntersect));
+        } else {
+            return null;
+        }
     }
 
 }
