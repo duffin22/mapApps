@@ -152,9 +152,9 @@ public class PolygonDemoActivity extends AppCompatActivity
 
         final Polygon polygon = mMap.addPolygon(polyS);
 
-        PolylineOptions polyL = getCurrentPolyLine(8);
-
-        Polyline polyline = mMap.addPolyline(polyL);
+        final PolylineOptions polyL = getCurrentPolyLine(8);
+//
+        final Polyline polyline = mMap.addPolyline(polyL);
 
         CameraUpdate zoom=CameraUpdateFactory.zoomTo(15);
 
@@ -172,6 +172,7 @@ public class PolygonDemoActivity extends AppCompatActivity
             public void onMarkerDrag(Marker marker) {
                 shapePoints.set(currentDragMarker, marker.getPosition());
                 polygon.setPoints(shapePoints);
+                polyline.setPoints(getCurrentPolyLine(5).getPoints());
             }
 
             @Override
@@ -180,6 +181,14 @@ public class PolygonDemoActivity extends AppCompatActivity
         });
 
 
+    }
+
+    public PolylineOptions makeNewStylePolyline(int split) {
+
+        PolylineOptions pl = new PolylineOptions()
+                .color(Color.argb(255, 50, 50, 200));
+
+        return pl;
     }
 
     public PolylineOptions getCurrentPolyLine(int split) {
@@ -200,6 +209,19 @@ public class PolygonDemoActivity extends AppCompatActivity
 
 
         return pl;
+    }
+
+            //TODO: CHange logic in this method
+    public LatLng getDistanceAlongLine(double distance, MapLine line) {
+        LatLng point1 = line.startPoint;
+        LatLng point2 = line.endPoint;
+        double lat1 = point1.latitude, lat2 = point2.latitude;
+        double lon1 = point1.longitude, lon2 = point2.longitude;
+
+        double newLat = lat1+distance;
+        double newLong = lon1+distance;
+
+        return new LatLng(newLat,newLong);
     }
 
     public LatLng getFractionAlongLine(int numerator, int denominator, LatLng point1, LatLng point2) {
