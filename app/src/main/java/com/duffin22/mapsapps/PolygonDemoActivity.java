@@ -166,34 +166,38 @@ public class PolygonDemoActivity extends AppCompatActivity
         mappy = getDefaultShape(start);
         final Polygon polygon = addMapShapeToMap(mappy);
 
-        Line line1 = mappy.getMiddleParallelLine();
-        PolylineOptions poly1 = new PolylineOptions()
-                                .color(Color.argb(255, 50, 50, 200))
-                                .add(line1.startPoint)
-                                .add(line1.endPoint);
-        final Polyline polyline1 = mMap.addPolyline(poly1);
+        String toast = "Distance is: "+mappy.getPerpendicularLineDistance()+" meters";
 
-        Line line2 = mappy.getParallelLineAtInterval(1,4);
-        PolylineOptions poly2 = new PolylineOptions()
-                .color(Color.argb(255, 50, 50, 200))
-                .add(line2.startPoint)
-                .add(line2.endPoint);
-        final Polyline polyline2 = mMap.addPolyline(poly2);
+        Toast.makeText(PolygonDemoActivity.this, toast, Toast.LENGTH_SHORT).show();
 
-        Line line3 = mappy.getParallelLineAtInterval(3,4);
-        PolylineOptions poly3 = new PolylineOptions()
-                .color(Color.argb(255, 50, 50, 200))
-                .add(line3.startPoint)
-                .add(line3.endPoint);
-        final Polyline polyline3 = mMap.addPolyline(poly3);
-
-        //perpendicular skeleton line
-//        Line line2 = mappy.getPerpendicularBaseLine();
+//        Line line1 = mappy.getMiddleParallelLine();
+//        PolylineOptions poly1 = new PolylineOptions()
+//                                .color(Color.argb(255, 50, 50, 200))
+//                                .add(line1.startPoint)
+//                                .add(line1.endPoint);
+//        final Polyline polyline1 = mMap.addPolyline(poly1);
+//
+//        Line line2 = mappy.getParallelLineAtInterval(1,4);
 //        PolylineOptions poly2 = new PolylineOptions()
-//                .color(Color.argb(255, 50, 200, 50))
+//                .color(Color.argb(255, 50, 50, 200))
 //                .add(line2.startPoint)
 //                .add(line2.endPoint);
 //        final Polyline polyline2 = mMap.addPolyline(poly2);
+//
+//        Line line3 = mappy.getParallelLineAtInterval(3,4);
+//        PolylineOptions poly3 = new PolylineOptions()
+//                .color(Color.argb(255, 50, 50, 200))
+//                .add(line3.startPoint)
+//                .add(line3.endPoint);
+//        final Polyline polyline3 = mMap.addPolyline(poly3);
+
+//        List<LatLng> fullLineList = mappy.getCoveringRoute(4);
+//        PolylineOptions fullLine = new PolylineOptions()
+//                                        .color(Color.argb(255, 50, 50, 200));
+//        for (int i = 0; i < fullLineList.size(); i++) {
+//            fullLine.add(fullLineList.get(i));
+//        }
+//        final Polyline coverLine = mMap.addPolyline(fullLine);
 
 
         CameraUpdate zoom=CameraUpdateFactory.zoomTo(15);
@@ -218,25 +222,26 @@ public class PolygonDemoActivity extends AppCompatActivity
             @Override
             public void onMarkerDragEnd(Marker marker) {
                 List<LatLng> listy = new ArrayList<>(), listy2 = new ArrayList<>(), listy3 = new ArrayList<>();
-//                Line bl = mappy.getPerpendicularBaseLine();
-//                Line bl = mappy.getPerpendicularBaseLine();
-//                listy.add(bl.startPoint);
-//                listy.add(bl.endPoint);
-//                polyline2.setPoints(listy);
-                Line pl = mappy.getMiddleParallelLine();
-                listy.add(pl.startPoint);
-                listy.add(pl.endPoint);
-                polyline1.setPoints(listy);
 
-                Line pl2 = mappy.getParallelLineAtInterval(1,4);
-                listy2.add(pl2.startPoint);
-                listy2.add(pl2.endPoint);
-                polyline2.setPoints(listy2);
+                String toast = "Distance is: "+mappy.getPerpendicularLineDistance()+" meters";
 
-                Line pl3 = mappy.getParallelLineAtInterval(3,4);
-                listy3.add(pl3.startPoint);
-                listy3.add(pl3.endPoint);
-                polyline3.setPoints(listy3);
+                Toast.makeText(PolygonDemoActivity.this, toast, Toast.LENGTH_SHORT).show();
+//                List<LatLng> fullLineList = mappy.getCoveringRoute(4);
+
+//                Line pl = mappy.getMiddleParallelLine();
+//                listy.add(pl.startPoint);
+//                listy.add(pl.endPoint);
+//                polyline1.setPoints(listy);
+//
+//                Line pl2 = mappy.getParallelLineAtInterval(1,4);
+//                listy2.add(pl2.startPoint);
+//                listy2.add(pl2.endPoint);
+//                polyline2.setPoints(listy2);
+//
+//                Line pl3 = mappy.getParallelLineAtInterval(3,4);
+//                listy3.add(pl3.startPoint);
+//                listy3.add(pl3.endPoint);
+//                polyline3.setPoints(listy3);
             }
         });
 

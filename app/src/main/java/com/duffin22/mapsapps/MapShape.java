@@ -1,5 +1,6 @@
 package com.duffin22.mapsapps;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.maps.android.SphericalUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -44,6 +45,16 @@ public class MapShape {
         LatLng midPoint = getFractionAlongLine(numerator,denominator,perpLine);
         Line parLine = getParallelLine(baseline, midPoint);
         return parLine;
+    }
+
+    public double getPerpendicularLineDistance() {
+        Line perpLine = this.getPerpendicularBaseLine();
+        LatLng startPoint = perpLine.startPoint;
+        LatLng endPoint = perpLine.endPoint;
+
+        double distanceInMetres = SphericalUtil.computeDistanceBetween(startPoint,endPoint);
+        return distanceInMetres;
+
     }
 
     public Line getMiddleParallelLine() {
