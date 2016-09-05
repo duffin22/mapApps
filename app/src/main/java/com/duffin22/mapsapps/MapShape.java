@@ -39,6 +39,7 @@ public class MapShape {
     }
 
     public Line getMiddleParallelLine() {
+
         Line baseline = this.edges.get(0);
         Line perpLine = this.getPerpendicularBaseLine();
         LatLng midPoint = getFractionAlongLine(1,2,perpLine);
