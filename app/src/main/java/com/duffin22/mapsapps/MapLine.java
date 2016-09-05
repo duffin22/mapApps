@@ -9,18 +9,57 @@ public class MapLine {
     LatLng startPoint, endPoint;
     double gradient;
     double constant;
+    int type;
+    public static final int TYPE_HORIZONTAL = 1,
+                            TYPE_VERTICAL = 2,
+                            TYPE_NORMAL = 3;
+
 
     public MapLine(LatLng startPoint, LatLng endPoint) {
+
         this.startPoint = startPoint;
         this.endPoint = endPoint;
 
         if (startPoint.latitude == endPoint.latitude) {
+            this.type = TYPE_VERTICAL;
             this.gradient = 0;
+            this.constant = 0;
+        } else if (startPoint.longitude == endPoint.longitude) {
+            this.type = TYPE_HORIZONTAL;
+            this.gradient = 0;
+            this.constant = startPoint.longitude;
         } else {
-            this.gradient = (startPoint.longitude - endPoint.longitude) / (startPoint.latitude-endPoint.latitude);
+            this.type = TYPE_NORMAL;
+            double top = startPoint.longitude - endPoint.longitude;
+            double bottom = startPoint.latitude-endPoint.latitude;
+            this.gradient = top/bottom;
+            this.constant = startPoint.longitude - (this.gradient * startPoint.latitude);
+        }
+    }
+
+    public double perpendicularDistanceFromPoint(LatLng point) {
+
+        double x = point.latitude, y = point.longitude;
+
+        double distance = (Math.abs(this.gradient*x-y+this.constant))/(Math.sqrt(Math.pow(this.gradient,2)+1));
+
+        return distance;
+    }
+
+    public LineInfinite getPerpendicularLine(LatLng crossPoint) {
+        if (this.type == TYPE_HORIZONTAL) {
+            //TODO: Add logic here
+            return null;
+        } else if (this.type == TYPE_VERTICAL) {
+            double newGradient = 0;
+            double newConstant = this.startPoint.longitude;
+            return new LineInfinite(newGradient, newConstant);
+        } else {
+            double newGradient = (-1)/this.gradient;
+            double newConstant = crossPoint.longitude + (crossPoint.latitude/this.gradient);
+            return new LineInfinite(newGradient, newConstant);
         }
 
-        this.constant = startPoint.longitude - (this.gradient * startPoint.latitude);
     }
 
     public double getLatFromLong(double longitude) {
@@ -43,8 +82,16 @@ public class MapLine {
         }
     }
 
-
     public boolean containsLat(double latitude) {
+
+        if (this.type == TYPE_VERTICAL) {
+            if (this.startPoint.latitude == latitude) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+
         double lowestLat, highestLat;
         if (this.startPoint.latitude < this.endPoint.latitude) {
             lowestLat = this.startPoint.latitude;
@@ -61,6 +108,15 @@ public class MapLine {
     }
 
     public boolean containsLong(double longitude) {
+
+        if (this.type == TYPE_HORIZONTAL) {
+            if (this.startPoint.longitude == longitude) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+
         double lowestLong, highestLong;
         if (this.startPoint.longitude < this.endPoint.longitude) {
             lowestLong = this.startPoint.longitude;
@@ -77,7 +133,7 @@ public class MapLine {
     }
 
     public LatLng intersectWith(MapLine line) {
-        if (line.gradient - this.gradient < 0.0001) {
+        if (line.gradient - this.gradient < 0.000001) {
             return null;
         }
         double latIntersect = (line.constant - this.constant)/(this.gradient - line.gradient);

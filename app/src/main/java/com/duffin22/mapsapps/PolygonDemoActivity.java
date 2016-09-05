@@ -46,7 +46,8 @@ public class PolygonDemoActivity extends AppCompatActivity
 
     public static final int ACCESS_FINE_LOCATION = 1992;
     GoogleMap mMap;
-    List<LatLng> shapePoints;
+//    List<LatLng> shapePoints;
+    MapShape mappy;
     int currentDragMarker;
     GoogleApiClient mGoogleApiClient;
     Location mLastLocation;
@@ -78,7 +79,8 @@ public class PolygonDemoActivity extends AppCompatActivity
 
     }
 
-    private List<LatLng> createShapeFromArray(List<LatLng> points) {
+    private void addMarkers(MapShape shape) {
+        List<LatLng> points = shape.vertices;
 
         for (int j = 0; j < points.size(); j++) {
             if (j == 0) {
@@ -93,9 +95,20 @@ public class PolygonDemoActivity extends AppCompatActivity
                         .title("" + j)
                         .draggable(true));
             }
-
         }
-        return points;
+    }
+
+    public Polygon addMapShapeToMap(MapShape shape) {
+        List<LatLng> points = shape.vertices;
+
+        final PolygonOptions polyS = new PolygonOptions()
+                .addAll(points)
+                .fillColor(Color.argb(90, 200, 200, 50))
+                .strokeColor(Color.WHITE);
+
+        addMarkers(shape);
+
+        return mMap.addPolygon(polyS);
     }
 
     protected void onStart() {
@@ -134,30 +147,26 @@ public class PolygonDemoActivity extends AppCompatActivity
         }
     }
 
-    public void setUpMapForNewProject() {
-
-        LatLng start = new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude());
+    public MapShape getDefaultShape(LatLng start) {
         double height = 0.003;
         double width = 0.005;
         LatLng btmLeft = new LatLng(start.latitude, start.longitude);
         LatLng topLeft = new LatLng(start.latitude + height, start.longitude);
         LatLng topRight = new LatLng(start.latitude + height, start.longitude + width);
         LatLng btmRight = new LatLng(start.latitude, start.longitude + width);
-        shapePoints = new ArrayList(Arrays.asList(btmLeft, topLeft, topRight, btmRight));
+        List<LatLng> shapePoints = new ArrayList(Arrays.asList(btmLeft, topLeft, topRight, btmRight));
+        return new MapShape(shapePoints);
+    }
 
-        final PolygonOptions polyS = new PolygonOptions()
-                .addAll(createShapeFromArray(shapePoints))
-                .fillColor(Color.argb(90, 200, 200, 50))
-                .strokeColor(Color.WHITE);
+    public void setUpMapForNewProject() {
 
-        final Polygon polygon = mMap.addPolygon(polyS);
+        LatLng start = new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude());
+        mappy = getDefaultShape(start);
+        final Polygon polygon = addMapShapeToMap(mappy);
 
-        final PolylineOptions polyL = getCurrentPolyLine(8);
-//
-        final Polyline polyline = mMap.addPolyline(polyL);
+
 
         CameraUpdate zoom=CameraUpdateFactory.zoomTo(15);
-
         mMap.moveCamera(CameraUpdateFactory.newLatLng(start));
         mMap.animateCamera(zoom);
 
@@ -172,7 +181,7 @@ public class PolygonDemoActivity extends AppCompatActivity
             public void onMarkerDrag(Marker marker) {
                 shapePoints.set(currentDragMarker, marker.getPosition());
                 polygon.setPoints(shapePoints);
-                polyline.setPoints(getCurrentPolyLine(5).getPoints());
+//                polyline.setPoints(getCurrentPolyLine(5).getPoints());
             }
 
             @Override
@@ -183,20 +192,13 @@ public class PolygonDemoActivity extends AppCompatActivity
 
     }
 
-    public PolylineOptions makeNewStylePolyline(int split) {
-
-        PolylineOptions pl = new PolylineOptions()
-                .color(Color.argb(255, 50, 50, 200));
-
-        return pl;
-    }
-
     public PolylineOptions getCurrentPolyLine(int split) {
+        List<LatLng> shapePoints = mappy.vertices;
         boolean toggle = true;
         PolylineOptions pl = new PolylineOptions()
                 .color(Color.argb(255, 50, 50, 200));
 
-        for (int i=0; i<=split; i++) {
+        for (int i = 0; i <= split; i++) {
             if (toggle) {
                 pl.add(getFractionAlongLine(i, split, shapePoints.get(0), shapePoints.get(3)));
                 pl.add(getFractionAlongLine(i, split, shapePoints.get(1), shapePoints.get(2)));
@@ -204,24 +206,11 @@ public class PolygonDemoActivity extends AppCompatActivity
                 pl.add(getFractionAlongLine(i, split, shapePoints.get(1), shapePoints.get(2)));
                 pl.add(getFractionAlongLine(i, split, shapePoints.get(0), shapePoints.get(3)));
             }
-            toggle=!toggle;
+            toggle = !toggle;
         }
 
 
         return pl;
-    }
-
-            //TODO: CHange logic in this method
-    public LatLng getDistanceAlongLine(double distance, MapLine line) {
-        LatLng point1 = line.startPoint;
-        LatLng point2 = line.endPoint;
-        double lat1 = point1.latitude, lat2 = point2.latitude;
-        double lon1 = point1.longitude, lon2 = point2.longitude;
-
-        double newLat = lat1+distance;
-        double newLong = lon1+distance;
-
-        return new LatLng(newLat,newLong);
     }
 
     public LatLng getFractionAlongLine(int numerator, int denominator, LatLng point1, LatLng point2) {
