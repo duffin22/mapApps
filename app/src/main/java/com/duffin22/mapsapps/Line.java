@@ -59,7 +59,7 @@ public class Line {
     }
 
     public boolean equalLL(double first, double second) {
-        if (Math.abs(first-second) < 0.0000001) {
+        if (Math.abs(first-second) < 0.000001) {
             return true;
         }
         return false;

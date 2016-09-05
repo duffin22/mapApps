@@ -23,7 +23,7 @@
 //        double newY = -1*xCoefficient;
 //        double newConstant = -1*(newX*this.startPoint.latitude+newY*this.startPoint.longitude);
 //        Line infinitePerp = new Line(newX, newY, newConstant);
-//        LatLng newEndPoint = line.intersectionWith(infinitePerp);
+//        LatLng newEndPoint = line.intersectionOf(infinitePerp);
 //        return new DefinedLine(this.startPoint,newEndPoint);
 //    }
 //

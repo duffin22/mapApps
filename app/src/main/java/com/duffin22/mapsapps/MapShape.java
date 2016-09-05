@@ -38,6 +38,14 @@ public class MapShape {
         return edges;
     }
 
+    public Line getParallelLineAtInterval(int numerator, int denominator) {
+        Line baseline = this.edges.get(0);
+        Line perpLine = this.getPerpendicularBaseLine();
+        LatLng midPoint = getFractionAlongLine(numerator,denominator,perpLine);
+        Line parLine = getParallelLine(baseline, midPoint);
+        return parLine;
+    }
+
     public Line getMiddleParallelLine() {
 
         Line baseline = this.edges.get(0);
@@ -91,7 +99,7 @@ public class MapShape {
     public Line getParallelLine(Line baseline, LatLng newPoint) {
         double A = baseline.xCoefficient, B = baseline.yCoefficient, C = baseline.constant;
         double x0 = newPoint.latitude, y0 = newPoint.longitude;
-        double D = A*x0 + B*y0;
+        double D = -1*(A*x0 + B*y0);
 
         Line newLine = new Line(A,B,D);
 
@@ -101,16 +109,66 @@ public class MapShape {
     }
 
     public Line intersectLineWithEndPoints(Line line) {
-        Line baseline = this.edges.get(0);
-        LatLng startPoint = null, endPoint = null;
-        for (Line edge : this.edges) {
-            if (line.intersectionWith(edge) != null && startPoint == null) {
-                startPoint = line.intersectionWith(edge);
-            } else if (line.intersectionWith(edge) != null) {
-                endPoint = line.intersectionWith(edge);
+        //The line in here has a gradient etc just no end points
+        List<LatLng> intersects = new ArrayList<>();
+        LatLng startPoint = null,endPoint = null;
+        for (int i=1; i < this.edges.size(); i++) {
+            //get access to each edge that is not the baseline
+            Line edge = this.edges.get(i);
+            LatLng intersect = lineIntersection(edge,line);
+            intersects.add(intersect);
+        }
+        System.out.println();
+        for (LatLng ll : intersects) {
+            if (ll != null && startPoint == null) {
+                startPoint = ll;
+            } else if (ll != null) {
+                endPoint = ll;
             }
         }
         return new Line(startPoint, endPoint);
+    }
+
+    public LatLng lineIntersection(Line l1, Line l2) {
+        Line mainLine, secondLine;
+        if (l1.startPoint != null) {
+            mainLine = l1;
+            secondLine = l2;
+        } else {
+            mainLine = l2;
+            secondLine = l1;
+        }
+
+        double loLat = Math.min(mainLine.startPoint.latitude, mainLine.endPoint.latitude),
+                hiLat = Math.max(mainLine.startPoint.latitude, mainLine.endPoint.latitude),
+                loLong = Math.min(mainLine.startPoint.longitude, mainLine.endPoint.longitude),
+                hiLong = Math.max(mainLine.startPoint.longitude, mainLine.endPoint.longitude);
+
+        double a = mainLine.xCoefficient, b = mainLine.yCoefficient, c = mainLine.constant,
+                d = secondLine.xCoefficient, e = secondLine.yCoefficient, f = secondLine.constant;
+
+        double det = b*d - a*e;
+        if (equalLL(0,det)) {
+            return null;
+        }
+
+        double newLong = (a*f - c*d)/det;
+        double newLat = (c*e - b*f)/det;
+
+        if (loLat <= newLat && newLat <= hiLat && loLong <= newLong && newLong <= hiLong) {
+            return new LatLng(newLat,newLong);
+        }
+
+        return null;
+
+
+    }
+
+    public boolean equalLL(double first, double second) {
+        if (Math.abs(first-second) < 0.000001) {
+            return true;
+        }
+        return false;
     }
 
     public LatLng getFractionAlongLine(int numerator, int denominator, Line line) {
