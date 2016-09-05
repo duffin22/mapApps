@@ -47,6 +47,57 @@ public class MapShape {
         return parLine;
     }
 
+    public List<LatLng> getCoveringPath(double distBetweenLines) {
+        Line perpLine = this.getPerpendicularBaseLine();
+        LatLng startPoint = perpLine.startPoint;
+        LatLng endPoint = perpLine.endPoint;
+        double distanceInMetres = SphericalUtil.computeDistanceBetween(startPoint,endPoint);
+        int numOfLines = (int) (distanceInMetres/distBetweenLines);
+
+        return getCoveringPathWithLines(numOfLines);
+    }
+
+    private List<LatLng> getCoveringPathWithLines(int numOfLines) {
+
+        //This should be changed to below 1 if logic holds
+        if (numOfLines < 2) {
+            return null;
+        }
+
+        Line startLine = this.edges.get(0);
+        Line perpLine = this.getPerpendicularBaseLine();
+        LatLng startPoint = perpLine.startPoint;
+        LatLng endPoint = perpLine.endPoint;
+
+        List<Line> newLines = new ArrayList<>();
+        for (int i = 1; i < numOfLines; i++) {
+            double fraction = i * 1.0 / numOfLines;
+            LatLng point = SphericalUtil.interpolate(startPoint, endPoint, fraction);
+            Line newLine = getParallelLine(startLine,point);
+            newLines.add(newLine);
+        }
+
+        List<LatLng> newPolyline = new ArrayList<>();
+        newPolyline.add(startLine.startPoint);
+        newPolyline.add(startLine.endPoint);
+        boolean toggle = false;
+
+        for (Line l : newLines) {
+            if (toggle) {
+                newPolyline.add(l.endPoint);
+                newPolyline.add(l.startPoint);
+            } else {
+                newPolyline.add(l.startPoint);
+                newPolyline.add(l.endPoint);
+            }
+            toggle=!toggle;
+        }
+
+        newPolyline.add(getFurthestNode());
+
+        return newPolyline;
+    }
+
     public double getPerpendicularLineDistance() {
         Line perpLine = this.getPerpendicularBaseLine();
         LatLng startPoint = perpLine.startPoint;

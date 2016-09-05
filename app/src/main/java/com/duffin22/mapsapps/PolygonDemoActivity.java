@@ -166,9 +166,11 @@ public class PolygonDemoActivity extends AppCompatActivity
         mappy = getDefaultShape(start);
         final Polygon polygon = addMapShapeToMap(mappy);
 
-        String toast = "Distance is: "+mappy.getPerpendicularLineDistance()+" meters";
+        PolylineOptions polyPath = new PolylineOptions()
+                                        .color(Color.argb(255, 50, 50, 200))
+                                        .addAll(mappy.getCoveringPath(50));
+        final Polyline polypath = mMap.addPolyline(polyPath);
 
-        Toast.makeText(PolygonDemoActivity.this, toast, Toast.LENGTH_SHORT).show();
 
 //        Line line1 = mappy.getMiddleParallelLine();
 //        PolylineOptions poly1 = new PolylineOptions()
@@ -223,10 +225,8 @@ public class PolygonDemoActivity extends AppCompatActivity
             public void onMarkerDragEnd(Marker marker) {
                 List<LatLng> listy = new ArrayList<>(), listy2 = new ArrayList<>(), listy3 = new ArrayList<>();
 
-                String toast = "Distance is: "+mappy.getPerpendicularLineDistance()+" meters";
-
-                Toast.makeText(PolygonDemoActivity.this, toast, Toast.LENGTH_SHORT).show();
-//                List<LatLng> fullLineList = mappy.getCoveringRoute(4);
+                List<LatLng> fullLineList = mappy.getCoveringPath(50);
+                polypath.setPoints(fullLineList);
 
 //                Line pl = mappy.getMiddleParallelLine();
 //                listy.add(pl.startPoint);
