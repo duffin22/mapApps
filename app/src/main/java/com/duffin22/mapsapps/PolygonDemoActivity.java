@@ -166,12 +166,19 @@ public class PolygonDemoActivity extends AppCompatActivity
         mappy = getDefaultShape(start);
         final Polygon polygon = addMapShapeToMap(mappy);
 
-        Line perpLine = mappy.getPerpendicularBaseLine();
-        PolylineOptions polyO = new PolylineOptions()
+        Line line1 = mappy.getMiddleParallelLine();
+        PolylineOptions poly1 = new PolylineOptions()
                                 .color(Color.argb(255, 50, 50, 200))
-                                .add(perpLine.startPoint)
-                                .add(perpLine.endPoint);
-        final Polyline polyline = mMap.addPolyline(polyO);
+                                .add(line1.startPoint)
+                                .add(line1.endPoint);
+        final Polyline polyline1 = mMap.addPolyline(poly1);
+
+        Line line2 = mappy.getPerpendicularBaseLine();
+        PolylineOptions poly2 = new PolylineOptions()
+                .color(Color.argb(255, 50, 200, 50))
+                .add(line2.startPoint)
+                .add(line2.endPoint);
+        final Polyline polyline2 = mMap.addPolyline(poly2);
 
 
         CameraUpdate zoom=CameraUpdateFactory.zoomTo(15);
@@ -195,11 +202,17 @@ public class PolygonDemoActivity extends AppCompatActivity
 
             @Override
             public void onMarkerDragEnd(Marker marker) {
-                List<LatLng> listy = new ArrayList<>();
+                List<LatLng> listy = new ArrayList<>(), listy2 = new ArrayList<LatLng>();
+//                Line bl = mappy.getPerpendicularBaseLine();
                 Line bl = mappy.getPerpendicularBaseLine();
                 listy.add(bl.startPoint);
                 listy.add(bl.endPoint);
-                polyline.setPoints(listy);
+                polyline2.setPoints(listy);
+                Line pl = mappy.getMiddleParallelLine();
+                listy2.add(pl.startPoint);
+                listy2.add(pl.endPoint);
+                polyline1.setPoints(listy2);
+
             }
         });
 

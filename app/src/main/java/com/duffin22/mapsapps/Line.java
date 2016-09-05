@@ -38,12 +38,10 @@ public class Line {
         return topLine/botLine;
     }
 
-
     public Line createLineParallelAt(LatLng point) {
         double newConstant = -1*(this.xCoefficient*point.latitude + this.yCoefficient*point.longitude);
         return new Line(xCoefficient, yCoefficient, newConstant);
     }
-
 
     public LatLng intersectionWith(Line line) {
         double a0 = this.xCoefficient, b0 = this.yCoefficient, c0 = this.constant,

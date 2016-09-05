@@ -1,7 +1,4 @@
 package com.duffin22.mapsapps;
-
-import android.graphics.drawable.shapes.Shape;
-
 import com.google.android.gms.maps.model.LatLng;
 
 import java.util.ArrayList;
@@ -41,6 +38,14 @@ public class MapShape {
         return edges;
     }
 
+    public Line getMiddleParallelLine() {
+        Line baseline = this.edges.get(0);
+        Line perpLine = this.getPerpendicularBaseLine();
+        LatLng midPoint = getFractionAlongLine(1,2,perpLine);
+        Line parLine = getParallelLine(baseline, midPoint);
+        return parLine;
+    }
+
     public Line getPerpendicularBaseLine() {
         //Get coordinates for starting node (x0,y0) and furthest away node (x1,y1)
         LatLng startPoint = this.vertices.get(0);
@@ -68,7 +73,7 @@ public class MapShape {
 
     }
 
-    public LatLng getFurthestNode() {
+    private LatLng getFurthestNode() {
         Line startLine = edges.get(0);
         double furthestNodeDistance = startLine.perpendicularDistanceTo(this.vertices.get(0));
         int furthestNodeIndex = 0;
@@ -81,6 +86,46 @@ public class MapShape {
         LatLng furthestPoint = this.vertices.get(furthestNodeIndex);
         return furthestPoint;
     }
+
+    public Line getParallelLine(Line baseline, LatLng newPoint) {
+        double A = baseline.xCoefficient, B = baseline.yCoefficient, C = baseline.constant;
+        double x0 = newPoint.latitude, y0 = newPoint.longitude;
+        double D = A*x0 + B*y0;
+
+        Line newLine = new Line(A,B,D);
+
+        Line trimmedLine = intersectLineWithEndPoints(newLine);
+
+        return trimmedLine;
+    }
+
+    public Line intersectLineWithEndPoints(Line line) {
+        Line baseline = this.edges.get(0);
+        LatLng startPoint = null, endPoint = null;
+        for (Line edge : this.edges) {
+            if (line.intersectionWith(edge) != null && startPoint == null) {
+                startPoint = line.intersectionWith(edge);
+            } else if (line.intersectionWith(edge) != null) {
+                endPoint = line.intersectionWith(edge);
+            }
+        }
+        return new Line(startPoint, endPoint);
+    }
+
+    public LatLng getFractionAlongLine(int numerator, int denominator, Line line) {
+        LatLng point1 = line.startPoint;
+        LatLng point2 = line.endPoint;
+        double lat1 = point1.latitude, lat2 = point2.latitude;
+        double lon1 = point1.longitude, lon2 = point2.longitude;
+
+        double fraction = (double) numerator/denominator;
+
+        double newLat = (lat2 * fraction) + (lat1 * (1-fraction));
+        double newLong = (lon2 * fraction) + (lon1 * (1-fraction));
+
+        return new LatLng(newLat,newLong);
+    }
+
 
 
 }
