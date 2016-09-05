@@ -11,10 +11,14 @@ import java.util.List;
  * Created by matthewtduffin on 04/09/16.
  */
 public class MapShape {
-    List<LatLng> vertices;
-    List<Line> edges;
+    private List<LatLng> vertices;
+    private List<Line> edges;
 
     public MapShape(List<LatLng> vertices) {
+        this.setVertices(vertices);
+    }
+
+    public void setVertices(List<LatLng> vertices) {
         this.vertices = vertices;
         List<Line> edgeList = new ArrayList<>();
         for (int i = 0; i < vertices.size(); i++) {
@@ -27,6 +31,14 @@ public class MapShape {
             edgeList.add(newLine);
         }
         this.edges = edgeList;
+    }
+
+    public List<LatLng> getVertices() {
+        return vertices;
+    }
+
+    public List<Line> getEdges() {
+        return edges;
     }
 
     public Line getPerpendicularBaseLine() {
@@ -47,8 +59,10 @@ public class MapShape {
         double D = A*x1 + B*y1;
         double E = A*y0 - B*x0;
 
-        double x2 = (A*D - B*E)/(Math.pow(A,2)+Math.pow(B,2));
-        double y2 = (A*E + B*D)/(Math.pow(A,2)+Math.pow(B,2));
+        double x2y2 = Math.pow(A,2)+Math.pow(B,2);
+
+        double x2 = (A*D - B*E)/x2y2;
+        double y2 = (A*E + B*D)/x2y2;
 
         return new Line(startPoint, new LatLng(x2,y2));
 

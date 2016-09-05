@@ -80,7 +80,7 @@ public class PolygonDemoActivity extends AppCompatActivity
     }
 
     private void addMarkers(MapShape shape) {
-        List<LatLng> points = shape.vertices;
+        List<LatLng> points = shape.getVertices();
 
         for (int j = 0; j < points.size(); j++) {
             if (j == 0) {
@@ -99,7 +99,7 @@ public class PolygonDemoActivity extends AppCompatActivity
     }
 
     public Polygon addMapShapeToMap(MapShape shape) {
-        List<LatLng> points = shape.vertices;
+        List<LatLng> points = shape.getVertices();
 
         final PolygonOptions polyS = new PolygonOptions()
                 .addAll(points)
@@ -151,10 +151,12 @@ public class PolygonDemoActivity extends AppCompatActivity
         double height = 0.003;
         double width = 0.005;
         LatLng btmLeft = new LatLng(start.latitude, start.longitude);
+            LatLng tl = new LatLng(start.latitude + height-0.001, start.longitude-0.002);
         LatLng topLeft = new LatLng(start.latitude + height+0.001, start.longitude-0.001);
+            LatLng tr = new LatLng(start.latitude + height+0.002, start.longitude + width+0.001);
         LatLng topRight = new LatLng(start.latitude + height, start.longitude + width+0.002);
         LatLng btmRight = new LatLng(start.latitude-0.001, start.longitude + width-0.003);
-        List<LatLng> shapePoints = new ArrayList(Arrays.asList(btmLeft, topLeft, topRight, btmRight));
+        List<LatLng> shapePoints = new ArrayList(Arrays.asList(btmLeft,tl, topLeft,tr, topRight, btmRight));
         return new MapShape(shapePoints);
     }
 
@@ -185,16 +187,19 @@ public class PolygonDemoActivity extends AppCompatActivity
 
             @Override
             public void onMarkerDrag(Marker marker) {
-                mappy.vertices.set(currentDragMarker, marker.getPosition());
-                polygon.setPoints(mappy.vertices);
-                List<LatLng> listy = new ArrayList<>();
-                listy.add(mappy.getPerpendicularBaseLine().startPoint);
-                listy.add(mappy.getPerpendicularBaseLine().endPoint);
-                polyline.setPoints(listy);
+                List<LatLng> verts = mappy.getVertices();
+                verts.set(currentDragMarker, marker.getPosition());
+                mappy.setVertices(verts);
+                polygon.setPoints(mappy.getVertices());
             }
 
             @Override
             public void onMarkerDragEnd(Marker marker) {
+                List<LatLng> listy = new ArrayList<>();
+                Line bl = mappy.getPerpendicularBaseLine();
+                listy.add(bl.startPoint);
+                listy.add(bl.endPoint);
+                polyline.setPoints(listy);
             }
         });
 
@@ -202,7 +207,7 @@ public class PolygonDemoActivity extends AppCompatActivity
     }
 
     public PolylineOptions getCurrentPolyLine(int split) {
-        List<LatLng> shapePoints = mappy.vertices;
+        List<LatLng> shapePoints = mappy.getVertices();
         boolean toggle = true;
         PolylineOptions pl = new PolylineOptions()
                 .color(Color.argb(255, 50, 50, 200));
