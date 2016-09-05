@@ -5,14 +5,25 @@ import com.google.android.gms.maps.model.LatLng;
 /**
  * Created by matthewtduffin on 04/09/16.
  */
-public class InfiniteLine {
+public class Line {
     double xCoefficient, yCoefficient, constant;
+    LatLng startPoint, endPoint;
 
-    public InfiniteLine() {
+    public Line() {
         //required empty constructor for an extended class
     }
 
-    public InfiniteLine(double x, double y, double c) {
+    public Line(LatLng startPoint, LatLng endPoint) {
+        this.startPoint = startPoint;
+        this.endPoint = endPoint;
+        double x0 = startPoint.latitude, y0 = startPoint.longitude,
+                x1 = endPoint.latitude, y1 = endPoint.longitude;
+        this.xCoefficient = y0-y1;
+        this.yCoefficient = x1-x0;
+        this.constant = x0*y1 - x1*y0;
+    }
+
+    public Line(double x, double y, double c) {
         this.xCoefficient = x;
         this.yCoefficient = y;
         this.constant = c;
@@ -28,7 +39,13 @@ public class InfiniteLine {
     }
 
 
-    public LatLng intersectionWith(InfiniteLine line) {
+    public Line createLineParallelAt(LatLng point) {
+        double newConstant = -1*(this.xCoefficient*point.latitude + this.yCoefficient*point.longitude);
+        return new Line(xCoefficient, yCoefficient, newConstant);
+    }
+
+
+    public LatLng intersectionWith(Line line) {
         double a0 = this.xCoefficient, b0 = this.yCoefficient, c0 = this.constant,
                 a1 = line.xCoefficient, b1 = line.yCoefficient, c1 = line.constant;
 

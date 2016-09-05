@@ -151,9 +151,9 @@ public class PolygonDemoActivity extends AppCompatActivity
         double height = 0.003;
         double width = 0.005;
         LatLng btmLeft = new LatLng(start.latitude, start.longitude);
-        LatLng topLeft = new LatLng(start.latitude + height, start.longitude);
-        LatLng topRight = new LatLng(start.latitude + height, start.longitude + width);
-        LatLng btmRight = new LatLng(start.latitude, start.longitude + width);
+        LatLng topLeft = new LatLng(start.latitude + height+0.001, start.longitude-0.001);
+        LatLng topRight = new LatLng(start.latitude + height, start.longitude + width+0.002);
+        LatLng btmRight = new LatLng(start.latitude-0.001, start.longitude + width-0.003);
         List<LatLng> shapePoints = new ArrayList(Arrays.asList(btmLeft, topLeft, topRight, btmRight));
         return new MapShape(shapePoints);
     }
@@ -164,6 +164,12 @@ public class PolygonDemoActivity extends AppCompatActivity
         mappy = getDefaultShape(start);
         final Polygon polygon = addMapShapeToMap(mappy);
 
+        Line perpLine = mappy.getPerpendicularBaseLine();
+        PolylineOptions polyO = new PolylineOptions()
+                                .color(Color.argb(255, 50, 50, 200))
+                                .add(perpLine.startPoint)
+                                .add(perpLine.endPoint);
+        final Polyline polyline = mMap.addPolyline(polyO);
 
 
         CameraUpdate zoom=CameraUpdateFactory.zoomTo(15);
@@ -179,9 +185,12 @@ public class PolygonDemoActivity extends AppCompatActivity
 
             @Override
             public void onMarkerDrag(Marker marker) {
-                shapePoints.set(currentDragMarker, marker.getPosition());
-                polygon.setPoints(shapePoints);
-//                polyline.setPoints(getCurrentPolyLine(5).getPoints());
+                mappy.vertices.set(currentDragMarker, marker.getPosition());
+                polygon.setPoints(mappy.vertices);
+                List<LatLng> listy = new ArrayList<>();
+                listy.add(mappy.getPerpendicularBaseLine().startPoint);
+                listy.add(mappy.getPerpendicularBaseLine().endPoint);
+                polyline.setPoints(listy);
             }
 
             @Override
