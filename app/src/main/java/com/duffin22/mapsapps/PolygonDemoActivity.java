@@ -104,7 +104,8 @@ public class PolygonDemoActivity extends AppCompatActivity
         final PolygonOptions polyS = new PolygonOptions()
                 .addAll(points)
                 .fillColor(Color.argb(90, 200, 200, 50))
-                .strokeColor(Color.WHITE);
+                .clickable(true)
+                .strokeColor(Color.RED);
 
         addMarkers(shape);
 
@@ -166,41 +167,27 @@ public class PolygonDemoActivity extends AppCompatActivity
         mappy = getDefaultShape(start);
         final Polygon polygon = addMapShapeToMap(mappy);
 
+
         PolylineOptions polyPath = new PolylineOptions()
-                                        .color(Color.argb(255, 50, 50, 200))
+                                        .color(Color.argb(160, 50, 50, 200))
                                         .addAll(mappy.getCoveringPath(50));
         final Polyline polypath = mMap.addPolyline(polyPath);
 
-
-//        Line line1 = mappy.getMiddleParallelLine();
-//        PolylineOptions poly1 = new PolylineOptions()
-//                                .color(Color.argb(255, 50, 50, 200))
-//                                .add(line1.startPoint)
-//                                .add(line1.endPoint);
-//        final Polyline polyline1 = mMap.addPolyline(poly1);
-//
-//        Line line2 = mappy.getParallelLineAtInterval(1,4);
-//        PolylineOptions poly2 = new PolylineOptions()
-//                .color(Color.argb(255, 50, 50, 200))
-//                .add(line2.startPoint)
-//                .add(line2.endPoint);
-//        final Polyline polyline2 = mMap.addPolyline(poly2);
-//
-//        Line line3 = mappy.getParallelLineAtInterval(3,4);
-//        PolylineOptions poly3 = new PolylineOptions()
-//                .color(Color.argb(255, 50, 50, 200))
-//                .add(line3.startPoint)
-//                .add(line3.endPoint);
-//        final Polyline polyline3 = mMap.addPolyline(poly3);
-
-//        List<LatLng> fullLineList = mappy.getCoveringRoute(4);
-//        PolylineOptions fullLine = new PolylineOptions()
-//                                        .color(Color.argb(255, 50, 50, 200));
-//        for (int i = 0; i < fullLineList.size(); i++) {
-//            fullLine.add(fullLineList.get(i));
-//        }
-//        final Polyline coverLine = mMap.addPolyline(fullLine);
-
+        mMap.setOnPolygonClickListener(new GoogleMap.OnPolygonClickListener() {
+            @Override
+            public void onPolygonClick(Polygon polygon) {
+                int rand = (int) (Math.random()*4);
+                if (rand==0) {
+                    polygon.setFillColor(Color.argb(200, 12, 12, 12));
+                } else if (rand ==1) {
+                    polygon.setFillColor(Color.argb(200, 80, 80, 80));
+                } else if (rand ==2) {
+                    polygon.setFillColor(Color.argb(200, 150, 150, 150));
+                } else if (rand ==3) {
+                    polygon.setFillColor(Color.argb(200, 220, 220, 220));
+                }
+            }
+        });
 
         CameraUpdate zoom=CameraUpdateFactory.zoomTo(15);
         mMap.moveCamera(CameraUpdateFactory.newLatLng(start));
@@ -219,32 +206,16 @@ public class PolygonDemoActivity extends AppCompatActivity
                 verts.set(currentDragMarker, marker.getPosition());
                 mappy.setVertices(verts);
                 polygon.setPoints(mappy.getVertices());
+                List<LatLng> fullLineList = mappy.getCoveringPath(50);
+                polypath.setPoints(fullLineList);
             }
 
             @Override
             public void onMarkerDragEnd(Marker marker) {
                 List<LatLng> listy = new ArrayList<>(), listy2 = new ArrayList<>(), listy3 = new ArrayList<>();
 
-                List<LatLng> fullLineList = mappy.getCoveringPath(50);
-                polypath.setPoints(fullLineList);
-
-//                Line pl = mappy.getMiddleParallelLine();
-//                listy.add(pl.startPoint);
-//                listy.add(pl.endPoint);
-//                polyline1.setPoints(listy);
-//
-//                Line pl2 = mappy.getParallelLineAtInterval(1,4);
-//                listy2.add(pl2.startPoint);
-//                listy2.add(pl2.endPoint);
-//                polyline2.setPoints(listy2);
-//
-//                Line pl3 = mappy.getParallelLineAtInterval(3,4);
-//                listy3.add(pl3.startPoint);
-//                listy3.add(pl3.endPoint);
-//                polyline3.setPoints(listy3);
             }
         });
-
 
     }
 
@@ -308,4 +279,5 @@ public class PolygonDemoActivity extends AppCompatActivity
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
 
     }
+
 }
